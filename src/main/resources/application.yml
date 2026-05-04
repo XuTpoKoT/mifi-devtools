@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/otp_db
+    username: otp_user
+    password: otp_pass
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
+  docker:
+    compose:
+      enabled: false
+springdoc:
+  swagger-ui:
+    url: /openapi.yaml
+jwt:
+  secret: U2VjcmV0S2V5Rm9ySldUU2lnbmluZ0FuZEV4YW1wbGVGb3JQcm9qZWN0MTIzNDU2
+server:
+  port: 8080

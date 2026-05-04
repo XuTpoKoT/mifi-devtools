@@ -1,0 +1,214 @@
+openapi: 3.0.3
+info:
+  title: OTP Service API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: User registered
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user and get JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+
+  /otp/generate:
+    post:
+      tags: [OTP]
+      summary: Generate OTP code for operation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateOtpRequest'
+      responses:
+        '200':
+          description: Generated OTP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpResponse'
+
+  /otp/validate:
+    post:
+      tags: [OTP]
+      summary: Validate OTP code
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateOtpRequest'
+      responses:
+        '200':
+          description: OTP validation result
+          content:
+            application/json:
+              schema:
+                type: string
+                example: OTP valid
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: Get all non-admin users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+
+  /admin/users/{id}:
+    delete:
+      tags: [Admin]
+      summary: Delete user and their OTPs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted
+
+  /admin/otp-config:
+    put:
+      tags: [Admin]
+      summary: Update OTP configuration
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpConfigRequest'
+      responses:
+        '200':
+          description: Config updated
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required: [login, password, role]
+      properties:
+        login:
+          type: string
+          example: user
+        password:
+          type: string
+          example: user
+
+    LoginRequest:
+      type: object
+      required: [login, password]
+      properties:
+        login:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: admin
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    GenerateOtpRequest:
+      type: object
+      required: [operationId]
+      properties:
+        operationId:
+          type: integer
+          example: 1001
+
+    ValidateOtpRequest:
+      type: object
+      required: [operationId, code]
+      properties:
+        operationId:
+          type: integer
+        code:
+          type: string
+          example: "123456"
+
+    OtpResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "123456"
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        login:
+          type: string
+        role:
+          type: string
+
+    OtpConfigRequest:
+      type: object
+      properties:
+        codeLength:
+          type: integer
+          example: 6
+        ttlSeconds:
+          type: integer
+          example: 300
